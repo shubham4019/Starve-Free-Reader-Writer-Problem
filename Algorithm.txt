@@ -1,0 +1,103 @@
+struct semaphore{//Defining semaphore
+    int val;
+    Queue *Q=(Queue*)malloc(sizeof(Queue));
+};
+struct Node{  //Struct to 
+    int n;
+    Node *next;
+}
+struct Queue{
+
+    Node *front;  //front pointer of Queue
+    Node *rear;     //rear pointer of Queue
+
+    void push(int pid){     //push new node to rear
+        Node *node=(Node*)malloc(sizeof(Node));
+        node->n=pid;
+        if(rear!=NULL){
+            rear->next=node;
+            rear=node;
+        }else{
+            front=node;
+            rear=front;
+        }
+    }
+
+    int pop(){  //pop node from front
+        if(front!=NULL){
+            int ret=front->n;
+            front=front->next;
+            free(front);
+            if(front==NULL)
+                rear=NULL;
+        }else{
+            return -1;
+        }
+        return ret;
+    }
+};
+
+
+void signal(semaphore **S){
+    *S->val++;
+    if(*S->val<=0){
+        int pid=*S->Q.pop(); //process id obtained after popping from queue
+        wakeup(pid); //Will wakeup the process
+    }
+}
+void wait(semaphore **S, int pid){
+    *S->val--;
+    if(*S->val<0){
+        *S->Q.push(pid);
+        block(); //Block the process
+    }
+}
+
+int main(){
+    //Initialize variables
+    semaphore *enter=new semaphore();
+    semaphore *exit=new semaphore();
+    semaphore *wrt=new semaphore();
+
+    int en=enter->val=1;
+    int ex=exit->val=1;
+    int wt=wrt->val=0;
+
+    int cntrin=0, cntrout=0;  //number of readers started and completed reading the resource
+    bool wait=false;//if the writer is writing
+
+
+    ///////////////////////////Enter Reader Section///////////////////////
+    wait(enter);
+    cntrin++;
+    signal(enter);
+
+    //Critical Section
+
+
+    wait(exit);
+    cntrout++;
+    if(wait==true &&  cntrin==cntrout)
+        signal(wrt);
+    signal(exit);
+    ///////////////////////////Enter Writer Section///////////////////////
+    wait(entry);
+    wait(exit);
+    if(cntrin==cntrout){
+        signal(exit);
+    }else{
+        wait=true;
+        signal(exit);
+        wait(wrt);
+        wait=false;
+    }
+
+
+    //Ctritical Section
+
+
+
+    signal(entry);
+    ///////////////////////////Exit Writer Section///////////////////////
+    return 0;
+}
