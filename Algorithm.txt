@@ -62,27 +62,28 @@ int main(){
     int en=enter->val=1;
     int ex=exit->val=1;
     int wt=wrt->val=0;
+    int id; //process id;
 
     int cntrin=0, cntrout=0;  //number of readers started and completed reading the resource
-    bool wait=false;//if the writer is writing
+    bool Wait=false;//if the writer is writing
 
 
     ///////////////////////////Enter Reader Section///////////////////////
-    wait(enter);
+    wait(enter, id);
     cntrin++;
     signal(enter);
 
     //Critical Section
 
 
-    wait(exit);
+    wait(exit, id);
     cntrout++;
-    if(wait==true &&  cntrin==cntrout)
+    if(Wait==true &&  cntrin==cntrout)
         signal(wrt);
     signal(exit);
     ///////////////////////////Enter Writer Section///////////////////////
-    wait(entry);
-    wait(exit);
+    wait(entry, id);
+    wait(exit, id);
     if(cntrin==cntrout){
         signal(exit);
     }else{
@@ -101,3 +102,13 @@ int main(){
     ///////////////////////////Exit Writer Section///////////////////////
     return 0;
 }
+
+When a writer accesses the shared resource, the readers and writers that come after it are queued. So when the writer has finished writing, the next process is selecting in FIFO order.
+This ensures that a writer or readers will not have to wait to access resources. If a reader is using the resource and some readers are also requesting it then they are granted permission, but if a writer comes along then it is queued and other readers and writers which come after it are also queued in the order they came. 
+
+The Wait boolean indicates a writer is next to access the resource. In reader section when a reader enter cntrin is incremented and when the reader exits cntrout is incremented.Then if both of them are equal and a Wait is true then the signal(wrt) is executed. In the writer section if cintrin and cntrout are equal then the writer enters the critical section. If not then Wait is set as true and wait(wrt) is executed.The wrt semaphore is assigned value 0 to make it more synchronized to both reader and writer section as writer only executes wait(wrt) and reader only executes signal(wrt). 
+
+References:
+Abraham Silberschatz, Peter B. Galvin, Greg Gagne - Operating System Concepts
+https://arxiv.org/abs/1309.4507
+cs/0303005
